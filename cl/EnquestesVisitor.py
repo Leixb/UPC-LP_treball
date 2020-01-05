@@ -1,4 +1,7 @@
 # Generated from Enquestes.g4 by ANTLR 4.7.2
+
+import networkx as nx
+
 from antlr4 import *
 if __name__ is not None and "." in __name__:
     from .EnquestesParser import EnquestesParser
@@ -9,12 +12,32 @@ else:
 
 class EnquestesVisitor(ParseTreeVisitor):
 
+    def __init__(self):
+        self.G = nx.DiGraph()
+        self.G.add_node("END")
+        self.data = dict()
+        self.id_enquesta = ''
+        self.edge_labels = dict()
+
+    def id_preg(self, item_id):
+        return self.data[item_id]['id_preg']
+
     # Visit a parse tree produced by EnquestesParser#root.
     def visitRoot(self, ctx:EnquestesParser.RootContext):
         n_children =  ctx.getChildCount()
         g = ctx.getChildren()
         l = [next(g) for i in range(n_children)]
-        return [self.visit(i) for i in l[:-1]]
+        l = [self.visit(i) for i in l[:-1]]
+
+        items = self.data[self.id_enquesta]['items']
+        prev = items[0]
+        for i in items[1:]:
+            self.G.add_edge(self.id_preg(prev), self.id_preg(i))
+            prev = i
+        self.G.add_edge(self.id_enquesta, self.id_preg(items[0]))
+        self.G.add_edge(self.id_preg(prev), "END")
+
+        return l
 
 
     # Visit a parse tree produced by EnquestesParser#enquesta.
@@ -31,8 +54,12 @@ class EnquestesVisitor(ParseTreeVisitor):
         g = ctx.getChildren()
         l = [next(g) for i in range(n_children)]
         pregunta = dict()
+        pregunta["tipus"] = "pregunta"
         pregunta["id"] = self.visit(l[0])
         pregunta["text"] = self.visit(l[4])
+
+        self.data[pregunta["id"]] = pregunta
+        self.G.add_node(pregunta["id"])
         return pregunta
 
 
@@ -50,8 +77,11 @@ class EnquestesVisitor(ParseTreeVisitor):
         g = ctx.getChildren()
         l = [next(g) for i in range(n_children)]
         resposta = dict()
+        resposta["tipus"] = "resposta"
         resposta["id"] = self.visit(l[0])
         resposta["opcions"] = self.visit(l[4])
+        self.data[resposta['id']] = resposta
+        self.G.add_node(resposta["id"])
         return resposta
 
 
@@ -97,9 +127,14 @@ class EnquestesVisitor(ParseTreeVisitor):
         g = ctx.getChildren()
         l = [next(g) for i in range(n_children)]
         item = dict()
+        item["tipus"] = "item"
         item["id"] = self.visit(l[0])
         item["id_preg"] = self.visit(l[4])
         item["id_resp"] = self.visit(l[6])
+        edge = (item["id_preg"], item["id_resp"])
+        self.G.add_edge(*edge)
+        self.edge_labels[edge] = item["id"]
+        self.data[item['id']] = item
         return item
 
 
@@ -119,9 +154,18 @@ class EnquestesVisitor(ParseTreeVisitor):
         g = ctx.getChildren()
         l = [next(g) for i in range(n_children)]
         alternativa = dict()
+        alternativa["tipus"] = "alternativa"
         alternativa["id"] = self.visit(l[0])
-        alternativa["id_preg"] = self.visit(l[4])
+        alternativa["id_item"] = self.visit(l[4])
         alternativa["alternatives"] = self.visit(l[5])
+        self.data[alternativa['id']] = alternativa
+
+        id_pregunta = self.id_preg(alternativa["id_item"])
+
+        for i in alternativa["alternatives"]:
+            edge = (id_pregunta, self.id_preg(i['id_item']))
+            self.edge_labels[edge] = str(i['id_opcio'])
+            self.G.add_edge(*edge)
         return alternativa
 
 
@@ -152,7 +196,11 @@ class EnquestesVisitor(ParseTreeVisitor):
         l = [next(g) for i in range(n_children)]
         enquesta = dict()
         enquesta['id'] = self.visit(l[0])
+        enquesta['tipus'] = "enquesta"
         enquesta['items'] = [self.visit(i) for i in l[4:-1]]
+        self.data[enquesta['id']] = enquesta
+        self.id_enquesta = enquesta['id']
+        self.G.add_node(enquesta['id'])
         return enquesta
 
 
