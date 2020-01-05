@@ -34,7 +34,6 @@ class EnquestesVisitor(ParseTreeVisitor):
         pregunta["id"] = self.visit(l[0])
         pregunta["text"] = self.visit(l[4])
         return pregunta
-        # return self.visitChildren(ctx)
 
 
     # Visit a parse tree produced by EnquestesParser#text_pregunta.
@@ -43,8 +42,6 @@ class EnquestesVisitor(ParseTreeVisitor):
         g = ctx.getChildren()
         l = [str(next(g)) for i in range(n_children)]
         return ' '.join(l)
-
-        #return self.visitChildren(ctx)
 
 
     # Visit a parse tree produced by EnquestesParser#resp.
@@ -56,7 +53,6 @@ class EnquestesVisitor(ParseTreeVisitor):
         resposta["id"] = self.visit(l[0])
         resposta["opcions"] = self.visit(l[4])
         return resposta
-        # return self.visitChildren(ctx)
 
 
     # Visit a parse tree produced by EnquestesParser#opcions_resposta.
@@ -65,7 +61,6 @@ class EnquestesVisitor(ParseTreeVisitor):
         g = ctx.getChildren()
         l = [self.visit(next(g)) for i in range(n_children)]
         return l
-        # return self.visitChildren(ctx)
 
 
     # Visit a parse tree produced by EnquestesParser#opcio_resposta.
@@ -87,7 +82,6 @@ class EnquestesVisitor(ParseTreeVisitor):
         l = [str(next(g)) for i in range(n_children)]
         text = ' '.join(l)
         return text.split(';')[0].strip()
-        #return self.visitChildren(ctx)
 
 
     # Visit a parse tree produced by EnquestesParser#id_opcio.
@@ -165,7 +159,6 @@ class EnquestesVisitor(ParseTreeVisitor):
     # Visit a parse tree produced by EnquestesParser#identificador.
     def visitIdentificador(self, ctx:EnquestesParser.IdentificadorContext):
         return ctx.getText()
-        # return self.visitChildren(ctx)
 
 
 
