@@ -4,26 +4,26 @@ root : enquesta+ EOF ;
 
 enquesta : ( preg | resp | item | alte | enqu )+ END NL? ;
 
-preg : id SEP PREGUNTA NL text_pregunta NL ;
+preg : identificador SEP PREGUNTA NL text_pregunta NL ;
 text_pregunta : ( INT | WORD | ID | SEMI | COMMA | LPAR | RPAR | LCLAU | RCLAU | ARROW | PREGUNTA | RESPOSTA | ITEM | ALTERNATIVA | ENQUESTA )+ ;
 
-resp : id SEP RESPOSTA NL opcions_resposta ;
+resp : identificador SEP RESPOSTA NL opcions_resposta ;
 opcions_resposta : opcio_resposta+ ;
 opcio_resposta : id_opcio SEP text_opcio ;
 text_opcio : (INT | WORD | ID | COMMA | LPAR | RPAR | LCLAU | RCLAU | ARROW | PREGUNTA | RESPOSTA | ITEM | ALTERNATIVA | ENQUESTA )+ (SEMI | NL) NL? ;
 id_opcio : INT ;
 
-item : id SEP ITEM NL id_preg ARROW id_resp NL ;
+item : identificador SEP ITEM NL id_preg ARROW id_resp NL ;
 id_preg : ID ;
 id_resp : ID ;
 
-alte : id SEP ALTERNATIVA NL id_preg alternatives NL ;
+alte : identificador SEP ALTERNATIVA NL id_preg alternatives NL ;
 alternatives : LCLAU alternativa+ RCLAU ;
 alternativa : LPAR id_opcio COMMA id_preg RPAR COMMA? ;
 
-enqu : id SEP ENQUESTA NL id_preg+ NL ;
+enqu : identificador SEP ENQUESTA NL id_preg+ NL ;
 
-id : ID ;
+identificador : ID ;
 
 
 INT : [0-9]+ ;
