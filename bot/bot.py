@@ -140,7 +140,7 @@ def pregunta(update: Update, context: CallbackContext):
         del context.user_data["enquesta"]
         del context.user_data["pregunta"]
         LOGGER.info(
-            f"Enquesta %s finalitzada (usuari:%s)",
+            "Enquesta %s finalitzada (usuari:%s)",
             enq,
             update.message.from_user.username,
         )
