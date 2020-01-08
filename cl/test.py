@@ -67,7 +67,7 @@ def plot_network(G: nx.DiGraph, filename: str):
         node_size=500,
         node_color="pink",
         alpha=0.9,
-        labels={node: node.id for node in G.nodes()},
+        labels={node: node for node in G.nodes()},
     )
 
     edge_labels = nx.get_edge_attributes(G, "id")
