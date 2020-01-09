@@ -4,180 +4,146 @@ import networkx as nx
 
 from antlr4 import ParseTreeVisitor
 
-if __name__ is not None and "." in __name__:
-    from .EnquestesParser import EnquestesParser
-else:
-    from EnquestesParser import EnquestesParser
+from EnquestesParser import EnquestesParser
 
 
 class EnquestesVisitor(ParseTreeVisitor):
+    """Visitor de Enquestes"""
+
     def __init__(self):
-        self.G = nx.DiGraph()
-        self.add_node("END", tipus="END")
+        self.graph = nx.DiGraph()
+        self.graph.add_node("END", tipus="END")
         self.items = dict()
 
-    def add_node(self, node: str, **kwargs):
-        self.G.add_node(node, **kwargs)
-
-    def add_edge(self, a: str, b: str, **kwargs):
-        self.G.add_edge(a, b, **kwargs)
-
-    def id_preg(self, id_item):
+    def __id_preg(self, id_item):
         return self.items[id_item][0]
 
-    # Visit a parse tree produced by EnquestesParser#root.
-    def visitRoot(self, ctx: EnquestesParser.RootContext):
+    @staticmethod
+    def __get_children_list(ctx):
         n_children = ctx.getChildCount()
-        g = ctx.getChildren()
-        l = [next(g) for i in range(n_children)]
+        children = ctx.getChildren()
+        return [next(children) for _ in range(n_children)]
 
-        for i in l[:-1]:
+    def visitRoot(self, ctx: EnquestesParser.RootContext):
+        """Visit a parse tree produced by EnquestesParser#root."""
+
+        for i in self.__get_children_list(ctx)[:-1]:
             self.visit(i)
 
-        return self.G
+        return self.graph
 
-    # Visit a parse tree produced by EnquestesParser#enquesta.
     def visitEnquesta(self, ctx: EnquestesParser.EnquestaContext):
-        n_children = ctx.getChildCount()
-        g = ctx.getChildren()
-        l = [next(g) for i in range(n_children)]
-        return [self.visit(i) for i in l[:-2]]
+        """Visit a parse tree produced by EnquestesParser#enquesta."""
+        return [self.visit(i) for i in self.__get_children_list(ctx)[:-2]]
 
-    # Visit a parse tree produced by EnquestesParser#preg.
     def visitPreg(self, ctx: EnquestesParser.PregContext):
-        n_children = ctx.getChildCount()
-        g = ctx.getChildren()
-        l = [next(g) for i in range(n_children)]
-        ident = self.visit(l[0])
-        text = self.visit(l[4])
+        """Visit a parse tree produced by EnquestesParser#preg."""
+        children = self.__get_children_list(ctx)
+        ident = self.visit(children[0])
+        text = self.visit(children[4])
 
-        self.add_node(ident, tipus="pregunta", text=text)
+        self.graph.add_node(ident, tipus="pregunta", text=text)
 
-    # Visit a parse tree produced by EnquestesParser#text_pregunta.
     def visitText_pregunta(self, ctx: EnquestesParser.Text_preguntaContext):
-        n_children = ctx.getChildCount()
-        g = ctx.getChildren()
-        l = [str(next(g)) for i in range(n_children)]
-        return " ".join(l)
+        """Visit a parse tree produced by EnquestesParser#text_pregunta."""
+        children = [str(i) for i in self.__get_children_list(ctx)]
+        return " ".join(children)
 
-    # Visit a parse tree produced by EnquestesParser#resp.
     def visitResp(self, ctx: EnquestesParser.RespContext):
-        n_children = ctx.getChildCount()
-        g = ctx.getChildren()
-        l = [next(g) for i in range(n_children)]
+        """Visit a parse tree produced by EnquestesParser#resp."""
+        children = self.__get_children_list(ctx)
 
-        ident = self.visit(l[0])
-        opcions = self.visit(l[4])
-        self.add_node(ident, tipus="resposta", opcions=opcions)
+        ident = self.visit(children[0])
+        opcions = self.visit(children[4])
+        self.graph.add_node(ident, tipus="resposta", opcions=opcions)
 
-    # Visit a parse tree produced by EnquestesParser#opcions_resposta.
     def visitOpcions_resposta(self, ctx: EnquestesParser.Opcions_respostaContext):
-        n_children = ctx.getChildCount()
-        g = ctx.getChildren()
-        l = [self.visit(next(g)) for i in range(n_children)]
-        return l
+        """Visit a parse tree produced by EnquestesParser#opcions_resposta."""
+        return [self.visit(i) for i in self.__get_children_list(ctx)]
 
-    # Visit a parse tree produced by EnquestesParser#opcio_resposta.
     def visitOpcio_resposta(self, ctx: EnquestesParser.Opcio_respostaContext):
-        n_children = ctx.getChildCount()
-        g = ctx.getChildren()
-        l = [next(g) for i in range(n_children)]
-        return {"id": self.visit(l[0]), "text": self.visit(l[2])}
+        """Visit a parse tree produced by EnquestesParser#opcio_resposta."""
+        children = self.__get_children_list(ctx)
+        return {"id": self.visit(children[0]), "text": self.visit(children[2])}
 
-    # Visit a parse tree produced by EnquestesParser#text_opcio.
     def visitText_opcio(self, ctx: EnquestesParser.Text_opcioContext):
-        n_children = ctx.getChildCount()
-        g = ctx.getChildren()
-        l = [str(next(g)) for i in range(n_children)]
-        text = " ".join(l)
+        """Visit a parse tree produced by EnquestesParser#text_opcio."""
+        children = [str(i) for i in self.__get_children_list(ctx)]
+        text = " ".join(children)
         return text.split(";")[0].strip()
 
-    # Visit a parse tree produced by EnquestesParser#id_opcio.
     def visitId_opcio(self, ctx: EnquestesParser.Id_opcioContext):
-        g = ctx.getChildren()
-        return int(next(g).getText())
-        return self.visitChildren(ctx)
+        """Visit a parse tree produced by EnquestesParser#id_opcio."""
+        return int(next(ctx.getChildren()).getText())
 
-    # Visit a parse tree produced by EnquestesParser#item.
     def visitItem(self, ctx: EnquestesParser.ItemContext):
-        n_children = ctx.getChildCount()
-        g = ctx.getChildren()
-        l = [next(g) for i in range(n_children)]
-        ident = self.visit(l[0])
-        id_preg = self.visit(l[4])
-        id_resp = self.visit(l[6])
+        """Visit a parse tree produced by EnquestesParser#item."""
+        children = self.__get_children_list(ctx)
+        ident = self.visit(children[0])
+        id_preg = self.visit(children[4])
+        id_resp = self.visit(children[6])
         edge = (id_preg, id_resp)
 
-        self.add_edge(*edge, id=ident, tipus="item")
+        self.graph.add_edge(*edge, id=ident, tipus="item")
         self.items[ident] = edge
 
-    # Visit a parse tree produced by EnquestesParser#id_preg.
     def visitId_preg(self, ctx: EnquestesParser.Id_pregContext):
+        """Visit a parse tree produced by EnquestesParser#id_preg."""
         return ctx.getText()
 
-    # Visit a parse tree produced by EnquestesParser#id_resp.
     def visitId_resp(self, ctx: EnquestesParser.Id_respContext):
+        """Visit a parse tree produced by EnquestesParser#id_resp."""
         return ctx.getText()
 
-    # Visit a parse tree produced by EnquestesParser#alte.
     def visitAlte(self, ctx: EnquestesParser.AlteContext):
-        n_children = ctx.getChildCount()
-        g = ctx.getChildren()
-        l = [next(g) for i in range(n_children)]
+        """Visit a parse tree produced by EnquestesParser#alte."""
+        children = self.__get_children_list(ctx)
 
-        ident = self.visit(l[0])
-        id_item = self.visit(l[4])
-        alternatives = self.visit(l[5])
+        ident = self.visit(children[0])
+        id_item = self.visit(children[4])
+        alternatives = self.visit(children[5])
 
         id_pregunta = self.items[id_item][0]
 
         for i in alternatives:
-            edge = (id_pregunta, self.id_preg(i["id_item"]))
-            self.add_edge(*edge, id_opcio=i["id_opcio"], tipus="alternativa")
+            edge = (id_pregunta, self.__id_preg(i["id_item"]))
+            self.graph.add_edge(*edge, id_opcio=i["id_opcio"], tipus="alternativa")
 
-    # Visit a parse tree produced by EnquestesParser#alternatives.
     def visitAlternatives(self, ctx: EnquestesParser.AlternativesContext):
-        n_children = ctx.getChildCount()
-        g = ctx.getChildren()
-        l = [next(g) for i in range(n_children)]
-        l = l[1:-1]
-        return [self.visit(i) for i in l]
+        """Visit a parse tree produced by EnquestesParser#alternatives."""
+        return [self.visit(i) for i in self.__get_children_list(ctx)[1:-1]]
 
-    # Visit a parse tree produced by EnquestesParser#alternativa.
     def visitAlternativa(self, ctx: EnquestesParser.AlternativaContext):
-        n_children = ctx.getChildCount()
-        g = ctx.getChildren()
-        l = [next(g) for i in range(n_children)]
+        """Visit a parse tree produced by EnquestesParser#alternativa."""
+        children = self.__get_children_list(ctx)
 
-        return {"id_opcio": self.visit(l[1]), "id_item": self.visit(l[3])}
+        return {"id_opcio": self.visit(children[1]), "id_item": self.visit(children[3])}
 
-    # Visit a parse tree produced by EnquestesParser#enqu.
     def visitEnqu(self, ctx: EnquestesParser.EnquContext):
-        n_children = ctx.getChildCount()
-        g = ctx.getChildren()
-        l = [next(g) for i in range(n_children)]
-        ident = self.visit(l[0])
+        """Visit a parse tree produced by EnquestesParser#enqu."""
+        children = self.__get_children_list(ctx)
+        ident = self.visit(children[0])
 
-        items = [self.visit(i) for i in l[4:-1]]
+        items = [self.visit(i) for i in children[4:-1]]
 
-        self.add_node(ident, tipus="enquesta")
+        self.graph.add_node(ident, tipus="enquesta")
 
         def add_edge_enq(u, v):
             edge = (u, v)
             llista_enq = [ident]
-            if self.G.has_edge(*edge):
-                llista_enq = self.G.get_edge_data(*edge)["id_enq"] + [ident]
-            self.add_edge(*edge, tipus="default", id_enq=llista_enq)
+            if self.graph.has_edge(*edge):
+                llista_enq = self.graph.get_edge_data(*edge)["id_enq"] + [ident]
+            self.graph.add_edge(*edge, tipus="default", id_enq=llista_enq)
 
         prev = items[0]
-        add_edge_enq(ident, self.id_preg(prev))
+        add_edge_enq(ident, self.__id_preg(prev))
         for i in items[1:]:
-            add_edge_enq(self.id_preg(prev), self.id_preg(i))
+            add_edge_enq(self.__id_preg(prev), self.__id_preg(i))
             prev = i
-        add_edge_enq(self.id_preg(prev), "END")
+        add_edge_enq(self.__id_preg(prev), "END")
 
-    # Visit a parse tree produced by EnquestesParser#identificador.
     def visitIdentificador(self, ctx: EnquestesParser.IdentificadorContext):
+        """Visit a parse tree produced by EnquestesParser#identificador."""
         return ctx.getText()
 
 
