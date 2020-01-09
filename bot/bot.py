@@ -8,6 +8,7 @@ Email: aleix.bone@est.fib.upc.edu
 
 import logging
 import pickle
+import sys
 import tempfile
 
 # importing Telegram API
@@ -35,11 +36,10 @@ LOGGER = logging.getLogger(__name__)
 
 SAVE_OPTS = {"format": "png", "bbox_inches": "tight", "transparent": True}
 
-STATS_FILE = "stats.pckl"
-GRAPH_FILE = "../cl/network_graph.pckl"
+STATS_FILE = sys.path[0] + "/stats.pckl"
 
 # loading the access token from token.txt
-TOKEN = open("token.txt").read().strip()
+TOKEN = open(sys.path[0] + "/token.txt").read().strip()
 AUTHOR = "Aleix Boné Ribó\naleix.bone@est.fib.upc.edu"
 
 
@@ -61,10 +61,16 @@ except FileNotFoundError:
     RESPOSTES = dict()
 LOGGER.info(RESPOSTES)
 
-GRAPH = read_pickle(GRAPH_FILE)
+if len(sys.argv) <= 1:
+    LOGGER.error("Siusplau especifica el arxiu pickle amb el graf de les enquestes")
+    sys.exit(1)
+
+GRAPH = read_pickle(sys.argv[1])
 
 PREG_NODES = nx.get_node_attributes(GRAPH, "text")
 RESP_NODES = nx.get_node_attributes(GRAPH, "opcions")
+
+LOGGER.info("loaded graph from pickle %s", sys.argv[1])
 
 
 def add_resposta(id_pregunta, id_resposta):
@@ -221,7 +227,6 @@ def seguent_pregunta(update: Update, context: CallbackContext, opcio):
     default = None
 
     for _, nxt_id, data in GRAPH.edges(preg, data=True):
-        print(nxt_id, data)
         if data["tipus"] == "default" and enq in data["id_enq"]:
             default = nxt_id
         elif data["tipus"] == "alternativa" and data["id_opcio"] == opcio:
