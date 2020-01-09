@@ -52,7 +52,7 @@ Seguint l'exemple de l'apartat anterior (`graf.pckl`):
 $ python3 bot/bot.py graf.pckl
 ```
 
-URL del bot: t.me/***REMOVED*** 
+URL del bot: <https://t.me/**REMOVED**>
 
 ## Built With
 
@@ -63,5 +63,5 @@ URL del bot: t.me/***REMOVED***
 
 ## Authors
 
-* *****REMOVED***** - [***REMOVED***](mailto:***REMOVED***)
+* Leixb
 

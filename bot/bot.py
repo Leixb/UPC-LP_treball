@@ -2,8 +2,8 @@
 
 """
 File: bot.py
-Author: ***REMOVED***
-Email: ***REMOVED***
+Author **AUTHOR**
+Email: **EMAIL**
 """
 
 import logging
@@ -40,7 +40,7 @@ STATS_FILE = sys.path[0] + "/stats.pckl"
 
 # loading the access token from token.txt
 TOKEN = open(sys.path[0] + "/token.txt").read().strip()
-AUTHOR = "***REMOVED***\n***REMOVED***"
+AUTHOR = "**AUTHOR**\n**EMAIL**"
 
 
 def read_pickle(filename: str):
