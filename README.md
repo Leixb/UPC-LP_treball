@@ -52,6 +52,8 @@ Seguint l'exemple de l'apartat anterior (`graf.pckl`):
 $ python3 bot/bot.py graf.pckl
 ```
 
+URL del bot: t.me/***REMOVED*** 
+
 ## Built With
 
 * [ANTLR4](https://www.antlr.org/) - ANother Tool for Language Recognition
