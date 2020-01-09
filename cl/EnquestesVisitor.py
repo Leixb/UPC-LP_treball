@@ -162,12 +162,19 @@ class EnquestesVisitor(ParseTreeVisitor):
 
         self.add_node(ident, tipus="enquesta")
 
+        def add_edge_enq(u, v):
+            edge = (u, v)
+            llista_enq = [ident]
+            if self.G.has_edge(*edge):
+                llista_enq = self.G.get_edge_data(*edge)["id_enq"] + [ident]
+            self.add_edge(*edge, tipus="default", id_enq=llista_enq)
+
         prev = items[0]
-        self.add_edge(ident, self.id_preg(prev), tipus="default")
+        add_edge_enq(ident, self.id_preg(prev))
         for i in items[1:]:
-            self.add_edge(self.id_preg(prev), self.id_preg(i), tipus="default")
+            add_edge_enq(self.id_preg(prev), self.id_preg(i))
             prev = i
-        self.add_edge(self.id_preg(prev), "END", tipus="default")
+        add_edge_enq(self.id_preg(prev), "END")
 
     # Visit a parse tree produced by EnquestesParser#identificador.
     def visitIdentificador(self, ctx: EnquestesParser.IdentificadorContext):

@@ -248,15 +248,20 @@ def message_handler(update: Update, context: CallbackContext):
 def seguent_pregunta(update: Update, context: CallbackContext, opcio):
     """Decicdeix quina es la seguent pregunta."""
     preg = context.user_data["pregunta"]
+    enq = context.user_data["enquesta"]
 
     alternativa = None
     default = None
 
     for _, nxt_id, data in Graph.G.edges(preg, data=True):
-        if data["tipus"] == "default":
+        print(nxt_id, data)
+        if data["tipus"] == "default" and enq in data["id_enq"]:
             default = nxt_id
         elif data["tipus"] == "alternativa" and data["id_opcio"] == opcio:
             alternativa = nxt_id
+
+    LOGGER.info("default: %s", default)
+    LOGGER.info("alternativa: %s", alternativa)
 
     if alternativa is None:
         if default is None:
