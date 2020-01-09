@@ -14,25 +14,29 @@ from EnquestesParser import EnquestesParser
 from EnquestesVisitor import EnquestesVisitor
 
 
-PICKLE_FILE = "network_graph.pckl"
-PLOT_FILE = "network_graph.png"
-
 plt.ioff()
 
 def main():
     """Funcio principal, inicialitza l'entrada, guarda en un pickle i genera una gràfica."""
 
+    outputfile = "networkx_graph"
+
     if len(sys.argv) > 1:
         input_stream = FileStream(sys.argv[1], encoding="utf-8")
+        if len(sys.argv) > 2:
+            outputfile = sys.argv[2]
     else:
         input_stream = InputStream(input("? "))
 
     graph = parse_to_network(input_stream)
 
-    save_pickle(graph, PICKLE_FILE)
-    graph_restored = read_pickle(PICKLE_FILE)
+    graph_file = outputfile + ".pckl"
+    plot_file = outputfile + ".pckl"
 
-    plot_network(graph_restored, PLOT_FILE)
+    save_pickle(graph, graph_file)
+    graph_restored = read_pickle(graph_file)
+
+    plot_network(graph_restored, plot_file)
 
 
 def parse_to_network(input_stream) -> nx.DiGraph:
