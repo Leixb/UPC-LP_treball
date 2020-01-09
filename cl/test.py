@@ -16,6 +16,7 @@ from EnquestesVisitor import EnquestesVisitor
 
 plt.ioff()
 
+
 def main():
     """Funcio principal, inicialitza l'entrada, guarda en un pickle i genera una gràfica."""
 

@@ -107,7 +107,9 @@ class EnquestesVisitor(ParseTreeVisitor):
 
         for i in alternatives:
             edge = (id_pregunta, self.__id_preg(i["id_item"]))
-            self.graph.add_edge(*edge, id_alt=ident, id_opcio=i["id_opcio"], tipus="alternativa")
+            self.graph.add_edge(
+                *edge, id_alt=ident, id_opcio=i["id_opcio"], tipus="alternativa"
+            )
 
     def visitAlternatives(self, ctx: EnquestesParser.AlternativesContext):
         """Visit a parse tree produced by EnquestesParser#alternatives."""
