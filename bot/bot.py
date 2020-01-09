@@ -66,8 +66,8 @@ LOGGER.info(RESPOSTES)
 
 GRAPH = read_pickle(GRAPH_FILE)
 
-PREGUNTES = nx.get_node_attributes(GRAPH, "text")
-RESPOSTES = nx.get_node_attributes(GRAPH, "opcions")
+PREG_NODES = nx.get_node_attributes(GRAPH, "text")
+RESP_NODES = nx.get_node_attributes(GRAPH, "opcions")
 
 
 def add_resposta(id_pregunta, id_resposta):
@@ -87,10 +87,9 @@ def save_respostes():
 # defining callback function for the /start command
 def start(update: Update, context: CallbackContext):
     """Envia misstage de benvinguda."""
-    del context
     update.message.reply_text(
         (
-            "Benvingut al quizBot!"
+            "Benvingut al quizBot!\n"
             "/quiz <idEnquesta> per contestar una enquesta o /help per veure la llista de commandes"
         )
     )
@@ -99,22 +98,20 @@ def start(update: Update, context: CallbackContext):
 
 def help_handler(update: Update, context: CallbackContext):
     """Mostra l'ajuda."""
-    del context
     text = (
-        "/start Inicia la conversa amb el Bot"
-        "/help Mostra llista de possibles commandes"
-        "/author Nom complet de l’autor del projecte i correu electrònic oficial de la facultat"
-        "/quiz <idEnquesta> Inicia un intèrpret realitzant una enquesta"
-        "/bar <idPreg> Retorna una diagrama de barres de les respostes a la pregunta"
-        "/pie <idPreg> Retorna una gràfica de formatget de les respostes a la pregunta"
-        "/report Retorna una taula amb el nombre de respostes obtingudes per cada valor"
+        "/start Inicia la conversa amb el Bot\n"
+        "/help Mostra llista de possibles commandes\n"
+        "/author Nom complet de l’autor del projecte i correu electrònic oficial de la facultat\n"
+        "/quiz <idEnquesta> Inicia un intèrpret realitzant una enquesta\n"
+        "/bar <idPreg> Retorna una diagrama de barres de les respostes a la pregunta\n"
+        "/pie <idPreg> Retorna una gràfica de formatget de les respostes a la pregunta\n"
+        "/report Retorna una taula amb el nombre de respostes obtingudes per cada valor\n"
     )
     update.message.reply_text(text)
 
 
 def author(update: Update, context: CallbackContext):
     """Envia el nom de l'auto i el correu de la facultat."""
-    del context
     update.message.reply_text(AUTHOR)
 
 
@@ -131,7 +128,6 @@ def quiz(update: Update, context: CallbackContext):
 
 def bar_plot(update: Update, context: CallbackContext):
     """Handler de la commanda /bar."""
-    del context
     if len(context.args) == 0:
         update.message.reply_text("La commanda /bar necesita el id de la pregunta")
         return
@@ -179,7 +175,6 @@ def pie_plot(update: Update, context: CallbackContext):
 
 def report(update: Update, context: CallbackContext):
     """Handler de la commanda /report."""
-    del context
     text = "*pregunta valor respostes*\n"
     for preg, respostes in RESPOSTES.items():
         for resposta, count in respostes.items():
@@ -204,7 +199,7 @@ def pregunta(update: Update, context: CallbackContext):
         update.message.reply_text(f"{enq}> Gràcies pel teu temps!")
         return
 
-    text_preg = PREGUNTES[preg]
+    text_preg = PREG_NODES[preg]
 
     text = f"{enq}> {text_preg}\n"
 
@@ -212,7 +207,7 @@ def pregunta(update: Update, context: CallbackContext):
         try:
             if data["tipus"] == "item":
                 context.user_data["resposta"] = r_id
-                for opcio in RESPOSTES[r_id]:
+                for opcio in RESP_NODES[r_id]:
                     text += f"{opcio['id']}: {opcio['text']}\n"
                 update.message.reply_text(text)
                 return
@@ -262,7 +257,6 @@ def send_plot(update: Update):
 
 def message_handler(update: Update, context: CallbackContext):
     """Handler de missatges."""
-    del context
     if "resposta" not in context.user_data:
         update.message.reply_text("Si us plau inicia l'enquesta amb /quiz <idEnquesta>")
         return
@@ -270,7 +264,7 @@ def message_handler(update: Update, context: CallbackContext):
 
     text = update.message.text.strip()
 
-    for opcio in RESPOSTES[r_id]:
+    for opcio in RESP_NODES[r_id]:
         if str(opcio["id"]) == text:
             add_resposta(context.user_data["pregunta"], opcio["id"])
             seguent_pregunta(update, context, opcio["id"])
