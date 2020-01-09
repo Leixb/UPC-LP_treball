@@ -8,7 +8,6 @@ Email: aleix.bone@est.fib.upc.edu
 
 import logging
 import pickle
-import sys
 import tempfile
 
 # importing Telegram API
@@ -23,8 +22,6 @@ from telegram.ext import (
 
 import matplotlib.pyplot as plt
 import networkx as nx
-
-sys.path.append("../cl")
 
 # Disable interactive plotting
 plt.ioff()
