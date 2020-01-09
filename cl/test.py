@@ -32,7 +32,7 @@ def main():
     graph = parse_to_network(input_stream)
 
     graph_file = outputfile + ".pckl"
-    plot_file = outputfile + ".pckl"
+    plot_file = outputfile + ".png"
 
     save_pickle(graph, graph_file)
     graph_restored = read_pickle(graph_file)
